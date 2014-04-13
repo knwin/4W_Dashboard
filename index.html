@@ -1,0 +1,648 @@
+<!--Created by Kyaw Naing Win, based on the concept of the work by Simon Johnson http://simonbjohnson.github.io/3W-Dashboard/-->
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0' name='viewport'>
+
+<title>OCHA PAKISTAN: Who does What Where</title>
+ 
+<script src='js/d3.js' type='text/javascript'></script>
+<script src='js/crossfilter.js' type='text/javascript'></script>
+<script src='js/dc.js' type='text/javascript'></script>
+<script src='js/jquery-1.11.0.min.js' type='text/javascript'></script>
+<script src='js/js/bootstrap.min.js' type='text/javascript'></script>
+<script src="js/pcode_pak.js"></script>
+<link href='css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+<link href='css/dc.css' rel='stylesheet' type='text/css'>
+<style type="text/css"></style> 
+<style type="text/css"></style>
+</head>
+<style type="text/css">
+	span.heading {
+	font-size: 18px;
+	color: blue;	
+	}
+	#map1, #map2{
+	 border:1px;
+	 border-color: grey;
+	 background: #F0F0F0;
+	}
+	.dc-chart path {
+    stroke-width: 1;
+    stroke: #eee;
+    fill-opacity: 1;
+	}
+	.dc-chart .deselected path {
+    stroke-width: 1;
+    stroke: #ccc;
+    fill-opacity: 1;
+	}
+	
+</style> 
+<body> 
+<div class='container' id='main-container'>
+	<div class='content'>
+		<div class='container' style='font: 12px sans-serif;'>
+ 
+			<div class='row'>
+				<div class='span12'>
+					<div class="row">
+					<h3>Complex Emergency - KP and FATA - Who does What Where Dashboard</h3>
+					</div>
+					<div class="row">
+						<div class="span6"><strong>Latest data:</strong> 31st January 2014  </div>
+						<div class="span6">
+							<a class="reset btn btn-primary btn-sm" id="reset" href="javascript:dc.filterAll();dc.redrawAll();">
+								Reset All
+							</a> ..click on chart elements or on map to see filtering effects
+						</div>
+					</div>				
+					<div class='row' id='row-chart-default'>
+						<p><span class="heading">By Projects</span><a href="javascript:map1Show();"> - Show Map</a><p>
+						<div class='span3' id='dc-donor-prj-chart'>
+							<h6>Top ten Donors</h6>
+						</div>
+						<div class='span3' id='dc-dist-prj-chart'>
+							<h6>Top ten Districts</h6>
+						</div>
+						<div class='span3' id='dc-cluster-prj-chart'>
+							<h6>by Cluster</h6>
+						</div>
+						<div class='pie-graph span3' id='dc-status-prj-chart'>
+							<h6>by Status</h6>
+						</div>				
+						
+					</div>
+					<hr id="h_line" />
+					<div class='row' id='row-chart-default2'>
+						<p><span class="heading">By Activites</span><a href="javascript:map2Show();"> - Show Map</a></p>
+						<div class='span3' id='dc-donor-act-chart'>
+							<h6>Top ten Donors</h6>
+						</div>
+						<div class='span3' id='dc-dist-act-chart'>
+							<h6>Top ten Districts</h6>
+						</div>
+						<div class='span3' id='dc-cluster-act-chart'>
+							<h6>by Cluster</h6>
+						</div>
+						<div class='pie-graph span3' id='dc-status-act-chart'>
+							<h6>by Status</h6>
+						</div>
+					</div>
+					<div class='row' id='row-chart-map1'>
+						<p><span class="heading">By Projects</span><a href="javascript:map2Show();"> - show by Activities</a> ; <a href="javascript:defaultShow();"> - show default</a></p>
+						<div class='span6'>
+							
+							<div class='row'>
+								<div class='span3' id='dc-donor-prj-chart2'>
+									<h6>Top ten Donors</h6>
+								</div>
+								<div class='span3' id='dc-dist-prj-chart2'>
+									<h6>Top ten Districts</h6>
+								</div>
+							</div>
+							<div class='row'>
+								<div class='span3' id='dc-cluster-prj-chart2'>
+									<h6>by Cluster</h6>
+								</div>
+								<div class='pie-graph span3' id='dc-status-prj-chart2'>
+									<h6>by Status</h6>
+								</div>	
+							</div>
+						</div>
+						<div class='span6' id='map1'></div>
+					</div>
+					<div class='row' id='row-chart-map2'>
+					<p><span class="heading">By Activites</span><a href="javascript:map1Show();"> - show by Projects</a>; <a href="javascript:defaultShow();"> - show default</a></p>
+						<div class='span6'>
+							
+							<div class='row'>
+								<div class='span3' id='dc-donor-act-chart2'>
+									<h6>Top ten Donors</h6>
+								</div>
+								<div class='span3' id='dc-dist-act-chart2'>
+									<h6>Top ten Districts</h6>
+								</div>
+							</div>					
+							<div class='row'>	
+								<div class='span3' id='dc-cluster-act-chart2'>
+									<h6>by Cluster</h6>
+								</div>
+								<div class='pie-graph span3' id='dc-status-act-chart2'>
+									<h6>by Status</h6>
+								</div>
+							</div>
+						</div>
+						<div class='span6 ' id='map2'></div>
+					</div>
+					
+				</div>
+			</div>
+ 
+		
+ 
+			<h6>Generated with
+			<a href="http://nickqizhu.github.io/dc.js/">dc.js</a>,
+			<a href="http://square.github.io/crossfilter/">crossfilter</a>,
+			<a href="http://d3js.org/">d3.js</a> and
+			<a href="http://twitter.github.io/bootstrap/">bootstrap</a>.
+			</h6>
+			<p> 4W data provided by IASC cluster lead agencies and compiled by <a href="http://pak.humanitarianresponse.info">OCHA</a>.</p>
+		</div>
+	</div>
+</div>
+
+
+<script>
+/**********************************
+* Step0: setup what to show *
+**********************************/
+/* display default charts */
+
+function defaultShow(){
+            $('#row-chart-default').show(); 
+			$('#row-chart-default2').show(); 
+			$('#h_line').show();
+            $('#row-chart-map1').hide();
+			$('#row-chart-map2').hide();
+           // donorChart.filterAll();
+			dc.filterAll();
+            dc.redrawAll();
+        }
+        
+function map1Show(){
+            $('#row-chart-map1').show();
+            $('#row-chart-map2').hide();
+			$('#row-chart-default').hide(); 
+			$('#row-chart-default2').hide(); 
+$('#h_line').hide();			
+			//donorChart.filterAll();
+			dc.filterAll();
+            dc.redrawAll();
+        }
+function map2Show(){
+            $('#row-chart-map1').hide();
+            $('#row-chart-map2').show();
+			$('#row-chart-default').hide(); 
+			$('#row-chart-default2').hide(); 
+			$('#h_line').hide();
+			//donorChart.filterAll();
+			dc.filterAll();
+            dc.redrawAll();
+	    }
+$('#row-chart-default').show();
+$('#row-chart-default2').show();
+$('#h_line').show();
+$('#row-chart-map1').hide();
+$('#row-chart-map2').hide();
+ 
+
+
+/*
+data.forEach(function(d) {
+	d.totalPerson=+d.total_person	
+}); 
+*/
+/******************************************************
+* Step1: Create the dc.js chart objects & link to divs *
+******************************************************/
+/* view-1 by projects */ 
+var donorPrjChart = dc.rowChart("#dc-donor-prj-chart");
+var distPrjChart = dc.rowChart("#dc-dist-prj-chart");
+var clusterPrjChart = dc.rowChart("#dc-cluster-prj-chart");
+var statusPrjChart =dc.pieChart("#dc-status-prj-chart");
+
+/* view-1 by activities */ 
+var donorActChart = dc.rowChart("#dc-donor-act-chart");
+var distActChart = dc.rowChart("#dc-dist-act-chart");
+var clusterActChart = dc.rowChart("#dc-cluster-act-chart");
+var statusActChart =dc.pieChart("#dc-status-act-chart");
+
+/* view-2 by porjects */
+var donorPrjChart2 = dc.rowChart("#dc-donor-prj-chart2");
+var distPrjChart2 = dc.rowChart("#dc-dist-prj-chart2");
+var clusterPrjChart2 = dc.rowChart("#dc-cluster-prj-chart2");
+var statusPrjChart2 =dc.pieChart("#dc-status-prj-chart2");
+var mapChart1 = dc.geoChoroplethChart("#map1");
+
+/* view-3 by activities */
+var donorActChart2 = dc.rowChart("#dc-donor-act-chart2");
+var distActChart2 = dc.rowChart("#dc-dist-act-chart2");
+var clusterActChart2 = dc.rowChart("#dc-cluster-act-chart2");
+var statusActChart2 =dc.pieChart("#dc-status-act-chart2");
+var mapChart2 = dc.geoChoroplethChart("#map2");
+
+//chart widths and heights
+var w = 235;
+var h = 200;
+var pie_w = 160;
+var pie_h = h; 
+
+/********************************************************************
+function for map_reduce unique counts
+//the code is adopted and modified from http://jsfiddle.net/djmartin_umich/3LyhL/
+*********************************************************************/
+// unique counts of project title 
+var reduceAdd_Prj = function (p, d) {
+                if (d.projectTitle in p.projectTitle)
+					p.projectTitle[d.projectTitle]++;
+                else {
+                    p.projectTitle[d.projectTitle] = 1;
+                    p.projectCount++;
+                }
+                return p;
+            };
+var reduceRemove_Prj = function (p, d) {
+                p.projectTitle[d.projectTitle]--;
+                if (p.projectTitle[d.projectTitle] === 0) {
+                    delete p.projectTitle[d.projectTitle];
+                    p.projectCount--;
+                }
+                return p;
+            };
+var reduceInitial_Prj = function () {
+                return {
+                    projectCount: 0,
+                    projectTitle: {}
+                };
+            }; 
+//unique count of activities
+var reduceAdd_Act = function (p, d) {
+			if (d.activity in p.activity)
+				p.activity[d.activity]++;
+			else {
+				p.activity[d.activity] = 1;
+				p.activityCount++;
+			}
+			return p;
+		};
+
+var reduceRemove_Act = function (p, d) {
+			p.activity[d.activity]--;
+			if (p.activity[d.activity] === 0) {
+				delete p.activity[d.activity];
+				p.activityCount--;
+			}
+			return p;
+		};
+
+var reduceInitial_Act =	function () {
+			return {
+				activityCount: 0,
+				activity: {}
+			}
+		
+};
+/****************************************
+* Run the data through crossfilter *
+****************************************/
+// load data from a csv file
+ d3.csv("Data/4Wdata.csv", function (data) {
+ 
+var cf = crossfilter(data); // Gets our 'data' into crossfilter
+
+/******************************************************
+* Create the Dimensions *
+* A dimension is something to group or filter by. *
+* Crossfilter can filter by exact value, or by range. *
+******************************************************/
+/* Dimensions for charts*/
+var donor=cf.dimension (function(d){ return d.donor;});
+var dist = cf.dimension(function(d) { return d.district;});
+var cluster=cf.dimension(function(d) {return d.cluster;});
+var status = cf.dimension(function(d){ return d.status;});
+/* by projects */
+
+var donorCount=donor.group().reduce(reduceAdd_Prj, reduceRemove_Prj, reduceInitial_Prj);
+var distCount=dist.group().reduce(reduceAdd_Prj, reduceRemove_Prj, reduceInitial_Prj);
+var clusterCount=cluster.group().reduce(reduceAdd_Prj, reduceRemove_Prj, reduceInitial_Prj);
+var statusCount=status.group().reduce(reduceAdd_Prj, reduceRemove_Prj, reduceInitial_Prj);
+
+/* by activity*/
+var donorCount2=donor.group().reduce(reduceAdd_Act, reduceRemove_Act, reduceInitial_Act);
+var distCount2=dist.group().reduce(reduceAdd_Act, reduceRemove_Act, reduceInitial_Act);
+var clusterCount2=cluster.group().reduce(reduceAdd_Act, reduceRemove_Act, reduceInitial_Act);
+var statusCount2=status.group().reduce(reduceAdd_Act, reduceRemove_Act, reduceInitial_Act);
+
+/* for mapping */
+var distCodeDimension = cf.dimension(function(d) { return d.distCode; });
+var distCodePrjGroup=distCodeDimension.group().reduce(reduceAdd_Prj, reduceRemove_Prj, reduceInitial_Prj);
+var distCodeActGroup=distCodeDimension.group().reduce(reduceAdd_Act, reduceRemove_Act, reduceInitial_Act);
+
+/****************************************************************************
+* Step4: Create the Visualisations *
+*****************************************************************************/
+// Cluster Row Graph 
+donorPrjChart.width(w).height(h)
+                .dimension(donor)
+				.group(donorCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})//borrowed code
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by to ten values
+				
+				.ordering(function(d){ return -d.value.projectCount; }) //sorting by largest to smallest
+				
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+				.colorAccessor(function (d){return 1;})                   
+                .elasticX(true)
+				//.xAxis().tickFormat(function(v) {return v;});
+				;
+donorPrjChart2.width(w).height(h)
+                .dimension(donor)
+				.group(donorCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})//borrowed code
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by to ten values
+				.ordering(function(d){ return -d.value.projectCount; }) //sorting by largest to smallest
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+				.colorAccessor(function (d){return 1;})                   
+                .elasticX(true)
+				//.xAxis().tickFormat(function(v) {return v;});
+				;
+
+// District Row Graph 
+distPrjChart.width(w).height(h)
+                .dimension(dist)
+                .group(distCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				.ordering(function(d){ return -d.value.projectCount; }) //sorting by largest to smallest
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+								.colorAccessor(function (d){return 1;})     
+				.elasticX(true)
+				//.xAxis().tickFormat(function(v) {return v;})
+				;
+distPrjChart2.width(w).height(h)
+                .dimension(dist)
+                .group(distCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				.ordering(function(d){ return -d.value.projectCount; }) //sorting by largest to smallest
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+								.colorAccessor(function (d){return 1;})     
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 160]))
+				;
+
+// Cluster Row Graph
+clusterPrjChart.width(w).height(h)
+                .dimension(cluster)
+                .group(clusterCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;					
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by top ten values		
+				.ordering(function(d){ return -d.value.projectCount })
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})				
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 100]))
+				//.xAxis().tickFormat(function(v) {return v;})
+				;
+clusterPrjChart2.width(w).height(h)
+                .dimension(cluster)
+                .group(clusterCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;					
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(10);
+				}) //this code is required to sort by top ten values		
+				.ordering(function(d){ return -d.value.projectCount })
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})				
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 100]))
+				//.xAxis().tickFormat(function(v) {return v;})
+				;
+
+// Project status pie chart				
+statusPrjChart.width(pie_w).height(pie_h)
+				//.margins({top: 10, right: 10, bottom: 20, left: 40})
+				.dimension(status)
+                .group(statusCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(Infinity);
+				}) //this code is required to sort by top ten values		
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+                .innerRadius(10)
+                .colorAccessor(function(d, i){return i%4;})
+				;
+				
+statusPrjChart2.width(pie_w).height(pie_h)
+				//.margins({top: 10, right: 10, bottom: 20, left: 40})
+				.dimension(status)
+                .group(statusCount)
+				.valueAccessor(function (d) {
+					return d.value.projectCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.projectCount;}).top(Infinity);
+				}) //this code is required to sort by top ten values		
+				.label(function(d){return "("+d.value.projectCount+")"+d.key;})
+                .innerRadius(10)
+                .colorAccessor(function(d, i){return i%4;})
+				;	
+					
+/**********charts for activities ***************/
+donorActChart.width(w).height(h)
+                .dimension(donor)
+				.group(donorCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})//borrowed code
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				
+				.ordering(function(d){ return -d.value.activityCount; }) //sorting by largest to smallest
+				
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+				.colorAccessor(function (d){return 1;})                   
+                .elasticX(true)						
+				//.xAxis().tickFormat(function(v) {return v;});
+				;
+donorActChart2.width(w).height(h)
+                .dimension(donor)
+				.group(donorCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})//borrowed code
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				
+				.ordering(function(d){ return -d.value.activityCount; }) //sorting by largest to smallest
+				
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+				.colorAccessor(function (d){return 1;})                   
+                .elasticX(true)						
+				//.xAxis().tickFormat(function(v) {return v;});
+				;
+// District Row Graph 
+distActChart.width(w).height(h)
+                .dimension(dist)
+                .group(distCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				.ordering(function(d){ return -d.value.activityCount; }) //sorting by largest to smallest
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+								.colorAccessor(function (d){return 1;})     
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 160]))
+				;
+				
+distActChart2.width(w).height(h)
+                .dimension(dist)
+                .group(distCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values
+				.ordering(function(d){ return -d.value.activityCount; }) //sorting by largest to smallest
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+				.colorAccessor(function (d){return 1;})     
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 160]))
+				;				
+				
+// Cluster Row Graph
+clusterActChart.width(w).height(h)
+                .dimension(cluster)
+                .group(clusterCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;					
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values		
+				.ordering(function(d){ return -d.value.activityCount; })
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})				
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 100]))
+				//.xAxis().tickFormat(function(v) {return v;})
+				;
+
+clusterActChart2.width(w).height(h)
+                .dimension(cluster)
+                .group(clusterCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;					
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(10);
+				}) //this code is required to sort by top ten values		
+				.ordering(function(d){ return -d.value.activityCount; })
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})				
+				.elasticX(true)
+				//.x(d3.scale.linear().domain([0, 100]))
+				//.xAxis().tickFormat(function(v) {return v;})
+				;
+				
+// Project status pie chart				
+statusActChart.width(pie_w).height(pie_h)
+				//.margins({top: 10, right: 10, bottom: 20, left: 40})
+				.dimension(status)
+                .group(statusCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(Infinity);
+				}) //this code is required to sort by top ten values		
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+                .innerRadius(10)
+                .colorAccessor(function(d, i){return i%4;})
+				;
+statusActChart2.width(pie_w).height(pie_h)
+				//.margins({top: 10, right: 10, bottom: 20, left: 40})
+				.dimension(status)
+                .group(statusCount2)
+				.valueAccessor(function (d) {
+					return d.value.activityCount;
+				})
+				.data(function(d) {
+					return d.order(function (d){return d.activityCount;}).top(Infinity);
+				}) //this code is required to sort by top ten values		
+				.label(function(d){return "("+d.value.activityCount+")"+d.key;})
+                .innerRadius(10)
+                .colorAccessor(function(d, i){return i%4;})
+				;
+
+//********** Map ****************
+
+d3.json("Data/pak_districts.json", function (distJSON){
+				mapChart1.width(460).height(460)
+					.dimension(distCodeDimension)
+					.group(distCodePrjGroup)
+					.colors(d3.scale.quantize().range(["#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#0061B5"])) //"#E2F2FF", 
+                    .colorDomain([0, 22])
+                    .colorCalculator(function (d) { return d.projectCount ? mapChart1.colors()(d.projectCount) : '#ccc'; })
+					.overlayGeoJson(distJSON.features, "DISTRICT", function (d) {
+						return d.properties.DIST_C_STR;
+						//return d.properties.DISTRICT;
+					})
+					.projection(d3.geo.mercator().center([74.75,33.5]).scale(4500))
+					.title(function (d) {
+						return "District: " + dcode2dist[d.key];
+						//return "District: " + d.key ;
+						
+					})
+					;
+				mapChart2.width(460).height(460)
+					.dimension(distCodeDimension)
+					.group(distCodeActGroup)
+					.colors(d3.scale.quantize().range(["#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#0061B5"])) //"#E2F2FF", 
+                    .colorDomain([0, 85])
+                    .colorCalculator(function (d) { return d.activityCount ? mapChart2.colors()(d.activityCount) : '#ccc'; })
+					.overlayGeoJson(distJSON.features, "DISTRICT", function (d) {
+						return d.properties.DIST_C_STR;
+						//return d.properties.DISTRICT;
+					})
+					.projection(d3.geo.mercator().center([74.75,33.5]).scale(4500))
+					.title(function (d) {
+						return "District: " + dcode2dist[d.key] ;
+						//return "District: " + d.key;
+					})
+					
+					;
+					
+						
+
+/****************************
+* Step6: Render the Charts *
+****************************/
+
+			dc.renderAll();
+
+  });			
+});
+
+</script>
+
+</body>
+</html>
