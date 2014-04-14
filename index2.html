@@ -149,6 +149,7 @@
 			<a href="http://twitter.github.io/bootstrap/">bootstrap</a>.
 			</h6>
 			<p> 4W data provided by IASC cluster lead agencies and compiled by <a href="http://pak.humanitarianresponse.info">OCHA</a>.</p>
+			<p> 4W data is stored on Google Spreadsheet and then use script to generate as JASON and read by d3.js</p>
 		</div>
 	</div>
 </div>
@@ -304,7 +305,7 @@ var reduceInitial_Act =	function () {
 // see example at http://pipetree.com/qmacro/blog/2013/10/sheetasjson-google-spreadsheet-data-as-json/
 // here "Data" is the sheet name in the google doc
  d3.json("https://script.google.com/macros/s/AKfycbwFEGYGIZipPEN5Iqc3OR640rfEhjYdM8rmAEXcJRCty65exFs/exec?id=0AkQQUmI4suWBdHYwT09RdXJxaHptRFNKV2c2NDhfY0E&sheet=Data", function (data){
-var cf = crossfilter(data.Data); // Gets our 'data' into crossfilter
+var cf = crossfilter(data.Data); // Gets 'data' into crossfilter
 
 /******************************************************
 * Create the Dimensions *
